@@ -5603,7 +5603,6 @@ Ready to paste and deploy! 🚀
                 <h3 class="modal-title">Add New Customer</h3>
                 <button class="close-btn" onclick="closeModal('addCustomerModal')">&times;</button>
             </div>
-
             <form id="addCustomerForm" onsubmit="addCustomer(event)">
                 <div class="form-grid">
                     <div class="form-group">
@@ -5868,3 +5867,1139 @@ Ready to paste and deploy! 🚀
                 <div id="loadSheetStep2" class="load-sheet-step" style="display: none;">
                     <div class="time-tracking">
                         <h4>⏱️ Time Tracking</h4>
+<div class="time-stamp">
+                            <span class="time-label">Departure Time:</span>
+                            <div>
+                                <span class="time-value" id="departureTime">Not recorded</span>
+                                <button type="button" class="btn-time" onclick="recordTime('departure')" id="departureBtn">Record Departure</button>
+                            </div>
+                        </div>
+                        <div class="time-stamp">
+                            <span class="time-label">Arrival at Pickup:</span>
+                            <div>
+                                <span class="time-value" id="pickupArrivalTime">Not recorded</span>
+                                <button type="button" class="btn-time" onclick="recordTime('pickupArrival')" id="pickupArrivalBtn" disabled>Record Arrival</button>
+                            </div>
+                        </div>
+                        <div class="time-stamp">
+                            <span class="time-label">Loading Complete:</span>
+                            <div>
+                                <span class="time-value" id="loadingCompleteTime">Not recorded</span>
+                                <button type="button" class="btn-time" onclick="recordTime('loadingComplete')" id="loadingCompleteBtn" disabled>Record Loading</button>
+                            </div>
+                        </div>
+                        <div class="time-stamp">
+                            <span class="time-label">Arrival at Delivery:</span>
+                            <div>
+                                <span class="time-value" id="deliveryArrivalTime">Not recorded</span>
+                                <button type="button" class="btn-time" onclick="recordTime('deliveryArrival')" id="deliveryArrivalBtn" disabled>Record Arrival</button>
+                            </div>
+                        </div>
+                        <div class="time-stamp">
+                            <span class="time-label">Delivery Complete:</span>
+                            <div>
+                                <span class="time-value" id="deliveryCompleteTime">Not recorded</span>
+                                <button type="button" class="btn-time" onclick="recordTime('deliveryComplete')" id="deliveryCompleteBtn" disabled>Record Completion</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; margin-top: 30px;">
+                        <button type="button" class="btn-secondary" onclick="nextLoadSheetStep(1)">Back to Load Info</button>
+                        <button type="button" class="btn-primary" onclick="nextLoadSheetStep(3)" id="toSignaturesBtn" disabled>Continue to Signatures</button>
+                    </div>
+                </div>
+
+                <!-- Step 3: Signatures -->
+                <div id="loadSheetStep3" class="load-sheet-step" style="display: none;">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Driver Signature <span class="required">*</span></label>
+                            <div class="signature-pad" onclick="openSignaturePad('driver')">
+                                <span>📝 Click to sign</span>
+                            </div>
+                            <input type="hidden" name="driverSignature" id="driverSignatureData">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Customer Signature</label>
+                            <div class="signature-pad" onclick="openSignaturePad('customer')">
+                                <span>📝 Click to sign</span>
+                            </div>
+                            <input type="hidden" name="customerSignature" id="customerSignatureData">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="loadSheetNotes">Notes</label>
+                        <textarea name="notes" id="loadSheetNotes" class="form-input" rows="4" placeholder="Any additional notes or observations..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="loadSheetPhotos">Photos (Before/After/Delivery)</label>
+                        <div class="file-input">
+                            <input type="file" id="loadSheetPhotos" multiple accept=".jpg,.jpeg,.png" onchange="handleLoadSheetPhotos(event)">
+                            <label for="loadSheetPhotos" class="file-input-label">
+                                <span>📸</span> Take/Upload Photos
+                            </label>
+                        </div>
+                        <div id="loadSheetPhotosPreview" class="document-grid"></div>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; margin-top: 30px;">
+                        <button type="button" class="btn-secondary" onclick="nextLoadSheetStep(2)">Back to Time Tracking</button>
+                        <button type="button" class="btn-primary" onclick="nextLoadSheetStep(4)">Complete Load Sheet</button>
+                    </div>
+                </div>
+
+                <!-- Step 4: Complete -->
+                <div id="loadSheetStep4" class="load-sheet-step" style="display: none;">
+                    <div style="text-align: center; padding: 40px 20px;">
+                        <div style="font-size: 64px; margin-bottom: 20px;">✅</div>
+                        <h3 style="color: #27ae60; margin-bottom: 15px;">Load Sheet Complete!</h3>
+                        <p style="color: #6c757d; margin-bottom: 30px;">Your load sheet has been saved and is ready for export.</p>
+                        
+                        <div style="display: flex; gap: 15px; justify-content: center;">
+                            <button type="button" class="btn-secondary" onclick="exportLoadSheet()">📤 Export PDF</button>
+                            <button type="submit" class="btn-save">💾 Save & Close</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script>
+        // Database simulation using memory storage
+        class FleetDB {
+            static data = {
+                drivers: [],
+                vehicles: [],
+                customers: [],
+                loads: [],
+                loadSheets: [],
+                documents: [],
+                settings: {
+                    fuelCostPerMile: 0.60,
+                    baseRatePerMile: 2.50,
+                    companyInfo: {
+                        name: 'LMK Fleet Management',
+                        address: 'Miami, FL',
+                        phone: '(305) 555-0123'
+                    }
+                }
+            };
+
+            static currentLoadSheet = {
+                times: {},
+                step: 1
+            };
+
+            static addDriver(driver) {
+                driver.id = 'DRV-' + Date.now();
+                driver.createdAt = new Date().toISOString();
+                driver.status = 'active';
+                this.data.drivers.push(driver);
+                this.saveToStorage();
+                return driver;
+            }
+
+            static addVehicle(vehicle) {
+                vehicle.id = 'VEH-' + Date.now();
+                vehicle.createdAt = new Date().toISOString();
+                vehicle.status = 'available';
+                vehicle.currentMileage = 0;
+                this.data.vehicles.push(vehicle);
+                this.saveToStorage();
+                return vehicle;
+            }
+
+            static addCustomer(customer) {
+                customer.id = 'CUST-' + Date.now();
+                customer.createdAt = new Date().toISOString();
+                customer.totalOrders = 0;
+                customer.totalRevenue = 0;
+                this.data.customers.push(customer);
+                this.saveToStorage();
+                return customer;
+            }
+
+            static addLoad(load) {
+                load.id = 'LOAD-' + Date.now();
+                load.createdAt = new Date().toISOString();
+                load.status = 'pending';
+                load.trackingNumber = 'TRK-' + new Date().getFullYear() + '-' + (this.data.loads.length + 1).toString().padStart(4, '0');
+                this.data.loads.push(load);
+                this.saveToStorage();
+                return load;
+            }
+
+            static addLoadSheet(loadSheet) {
+                loadSheet.id = 'LS-' + Date.now();
+                loadSheet.createdAt = new Date().toISOString();
+                loadSheet.sheetNumber = 'LS-' + new Date().getFullYear() + '-' + (this.data.loadSheets.length + 1).toString().padStart(4, '0');
+                this.data.loadSheets.push(loadSheet);
+                this.saveToStorage();
+                return loadSheet;
+            }
+
+            static saveDocument(document) {
+                document.id = 'DOC-' + Date.now();
+                document.uploadedAt = new Date().toISOString();
+                this.data.documents.push(document);
+                this.saveToStorage();
+                return document;
+            }
+
+            static getExpiringDocuments() {
+                const thirtyDaysFromNow = new Date();
+                thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
+                
+                const expiring = [];
+                
+                this.data.drivers.forEach(driver => {
+                    if (driver.licenseExpiry && new Date(driver.licenseExpiry) <= thirtyDaysFromNow) {
+                        expiring.push({
+                            type: 'Driver License',
+                            name: `${driver.firstName} ${driver.lastName}`,
+                            expiry: driver.licenseExpiry,
+                            critical: new Date(driver.licenseExpiry) <= new Date()
+                        });
+                    }
+                    if (driver.insuranceExpiry && new Date(driver.insuranceExpiry) <= thirtyDaysFromNow) {
+                        expiring.push({
+                            type: 'Driver Insurance',
+                            name: `${driver.firstName} ${driver.lastName}`,
+                            expiry: driver.insuranceExpiry,
+                            critical: new Date(driver.insuranceExpiry) <= new Date()
+                        });
+                    }
+                });
+
+                this.data.vehicles.forEach(vehicle => {
+                    if (vehicle.registrationExpiry && new Date(vehicle.registrationExpiry) <= thirtyDaysFromNow) {
+                        expiring.push({
+                            type: 'Vehicle Registration',
+                            name: vehicle.unitNumber,
+                            expiry: vehicle.registrationExpiry,
+                            critical: new Date(vehicle.registrationExpiry) <= new Date()
+                        });
+                    }
+                    if (vehicle.vehicleInsuranceExpiry && new Date(vehicle.vehicleInsuranceExpiry) <= thirtyDaysFromNow) {
+                        expiring.push({
+                            type: 'Vehicle Insurance',
+                            name: vehicle.unitNumber,
+                            expiry: vehicle.vehicleInsuranceExpiry,
+                            critical: new Date(vehicle.vehicleInsuranceExpiry) <= new Date()
+                        });
+                    }
+                });
+
+                return expiring;
+            }
+
+            static saveToStorage() {
+                updateDashboard();
+            }
+        }
+
+        // Global functions
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease forwards';
+                setTimeout(() => notification.remove(), 300);
+            }, 4000);
+        }
+
+        function showSection(sectionName) {
+            document.querySelectorAll('.content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            document.querySelectorAll('.nav-item').forEach(nav => {
+                nav.classList.remove('active');
+            });
+            
+            document.getElementById(sectionName).classList.add('active');
+            document.querySelector(`[onclick="showSection('${sectionName}')"]`).classList.add('active');
+            
+            switch(sectionName) {
+                case 'dashboard':
+                    updateDashboard();
+                    break;
+                case 'drivers':
+                    loadDrivers();
+                    break;
+                case 'vehicles':
+                    loadVehicles();
+                    break;
+                case 'customers':
+                    loadCustomers();
+                    break;
+                case 'loads':
+                    loadLoads();
+                    break;
+                case 'loadsheets':
+                    loadLoadSheets();
+                    break;
+                case 'reports':
+                    loadReports();
+                    break;
+            }
+        }
+
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+            
+            if (modalId === 'createLoadSheetModal') {
+                resetLoadSheetSteps();
+            }
+        }
+
+        function openAddDriverModal() {
+            openModal('addDriverModal');
+        }
+
+        function openAddVehicleModal() {
+            openModal('addVehicleModal');
+        }
+
+        function openAddCustomerModal() {
+            openModal('addCustomerModal');
+        }
+
+        function openCreateLoadModal() {
+            loadCustomersForLoadForm();
+            openModal('createLoadModal');
+        }
+
+        function openCreateLoadSheetModal() {
+            loadDataForLoadSheet();
+            openModal('createLoadSheetModal');
+        }
+
+        function validateAddress(input, validationId) {
+            const address = input.value.trim();
+            const validation = document.getElementById(validationId);
+            
+            if (!address) {
+                validation.style.display = 'none';
+                return;
+            }
+
+            setTimeout(() => {
+                if (address.length > 10 && address.includes(',')) {
+                    validation.className = 'address-validation';
+                    validation.textContent = '✅ Address validated';
+                    validation.style.display = 'block';
+                } else {
+                    validation.className = 'address-validation error';
+                    validation.textContent = '⚠️ Please enter a complete address';
+                    validation.style.display = 'block';
+                }
+            }, 500);
+        }
+
+        function handleMaterialChange(select) {
+            const customGroup = document.getElementById('customMaterialGroup');
+            if (select.value === 'custom') {
+                customGroup.style.display = 'block';
+            } else {
+                customGroup.style.display = 'none';
+            }
+        }
+
+        function calculateRoute() {
+            const pickup = document.querySelector('input[name="pickupLocation"]').value;
+            const delivery = document.querySelector('input[name="deliveryLocation"]').value;
+            
+            if (!pickup || !delivery) {
+                showNotification('Please enter both pickup and delivery locations', 'error');
+                return;
+            }
+
+            showNotification('Calculating route...', 'info');
+            
+            setTimeout(() => {
+                const distance = Math.round((Math.random() * 50 + 5) * 10) / 10;
+                const time = Math.round(distance / 25 * 60);
+                const fuelCost = Math.round(distance * 0.60 * 100) / 100;
+                const totalCost = Math.round((distance * 2.50 + fuelCost) * 100) / 100;
+
+                document.getElementById('routeDistance').textContent = distance + ' miles';
+                document.getElementById('routeTime').textContent = time + ' mins';
+                document.getElementById('fuelCost').textContent = '$' + fuelCost;
+                document.getElementById('totalCost').textContent = '$' + totalCost;
+                
+                document.getElementById('routeCalculation').style.display = 'block';
+                showNotification('Route calculated successfully!');
+            }, 1500);
+        }
+
+        function handleDriverDocuments(event) {
+            handleFileUpload(event, 'driverDocumentsPreview', 'driver');
+        }
+
+        function handleVehicleDocuments(event) {
+            handleFileUpload(event, 'vehicleDocumentsPreview', 'vehicle');
+        }
+
+        function handleLoadSheetPhotos(event) {
+            handleFileUpload(event, 'loadSheetPhotosPreview', 'loadsheet');
+        }
+
+        function handleFileUpload(event, previewId, type) {
+            const files = event.target.files;
+            const preview = document.getElementById(previewId);
+            preview.innerHTML = '';
+
+            Array.from(files).forEach((file, index) => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'document-item';
+                
+                const fileIcon = file.type.includes('pdf') ? '📄' : '📷';
+                const fileName = file.name.length > 15 ? file.name.substring(0, 12) + '...' : file.name;
+                
+                fileItem.innerHTML = `
+                    <div class="document-icon">${fileIcon}</div>
+                    <div class="document-name">${fileName}</div>
+                    <div class="document-date">${new Date().toLocaleDateString()}</div>
+                `;
+                
+                preview.appendChild(fileItem);
+                
+                FleetDB.saveDocument({
+                    name: file.name,
+                    type: file.type,
+                    size: file.size,
+                    category: type
+                });
+            });
+
+            if (files.length > 0) {
+                showNotification(`${files.length} file(s) uploaded successfully!`);
+            }
+        }
+
+        function loadDataForLoadSheet() {
+            const loadSelect = document.getElementById('loadSheetLoadSelect');
+            loadSelect.innerHTML = '<option value="">Select a Load</option>';
+            FleetDB.data.loads.forEach(load => {
+                const customer = FleetDB.data.customers.find(c => c.id === load.customerId);
+                loadSelect.innerHTML += `<option value="${load.id}">${load.trackingNumber} - ${customer ? customer.companyName : 'Unknown'}</option>`;
+            });
+
+            const driverSelect = document.getElementById('loadSheetDriverSelect');
+            driverSelect.innerHTML = '<option value="">Select Driver</option>';
+            FleetDB.data.drivers.forEach(driver => {
+                driverSelect.innerHTML += `<option value="${driver.id}">${driver.firstName} ${driver.lastName}</option>`;
+            });
+
+            const vehicleSelect = document.getElementById('loadSheetVehicleSelect');
+            vehicleSelect.innerHTML = '<option value="">Select Vehicle</option>';
+            FleetDB.data.vehicles.forEach(vehicle => {
+                vehicleSelect.innerHTML += `<option value="${vehicle.id}">${vehicle.unitNumber} - ${vehicle.make}</option>`;
+            });
+        }
+
+        function loadLoadDetails(loadId) {
+            const load = FleetDB.data.loads.find(l => l.id === loadId);
+            const details = document.getElementById('selectedLoadDetails');
+            
+            if (!load) {
+                details.style.display = 'none';
+                return;
+            }
+
+            const customer = FleetDB.data.customers.find(c => c.id === load.customerId);
+            
+            document.getElementById('loadDetailCustomer').textContent = customer ? customer.companyName : 'Unknown';
+            document.getElementById('loadDetailMaterial').textContent = load.materialType + (load.quantity ? ` (${load.quantity} ${load.unit})` : '');
+            document.getElementById('loadDetailPickup').textContent = load.pickupLocation;
+            document.getElementById('loadDetailDelivery').textContent = load.deliveryLocation;
+            
+            details.style.display = 'block';
+        }
+
+        function nextLoadSheetStep(stepNumber) {
+            document.querySelectorAll('.load-sheet-step').forEach(step => {
+                step.style.display = 'none';
+            });
+            
+            document.getElementById(`loadSheetStep${stepNumber}`).style.display = 'block';
+            
+            document.querySelectorAll('.step-circle').forEach((circle, index) => {
+                circle.classList.remove('active', 'completed');
+                if (index + 1 < stepNumber) {
+                    circle.classList.add('completed');
+                    circle.innerHTML = '✓';
+                } else if (index + 1 === stepNumber) {
+                    circle.classList.add('active');
+                    circle.innerHTML = index + 1;
+                } else {
+                    circle.innerHTML = index + 1;
+                }
+            });
+
+            document.querySelectorAll('.step-line').forEach((line, index) => {
+                if (index + 1 < stepNumber) {
+                    line.classList.add('completed');
+                } else {
+                    line.classList.remove('completed');
+                }
+            });
+
+            FleetDB.currentLoadSheet.step = stepNumber;
+        }
+
+        function resetLoadSheetSteps() {
+            FleetDB.currentLoadSheet = { times: {}, step: 1 };
+            nextLoadSheetStep(1);
+            
+            document.querySelectorAll('.btn-time').forEach(btn => {
+                btn.disabled = false;
+                if (btn.id === 'departureBtn') {
+                    btn.disabled = false;
+                } else {
+                    btn.disabled = true;
+                }
+            });
+            
+            document.querySelectorAll('.time-value').forEach(time => {
+                time.textContent = 'Not recorded';
+            });
+        }
+
+        function recordTime(timeType) {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString();
+            
+            FleetDB.currentLoadSheet.times[timeType] = now.toISOString();
+            document.getElementById(timeType + 'Time').textContent = timeString;
+            
+            document.getElementById(timeType + 'Btn').disabled = true;
+            
+            const sequence = ['departure', 'pickupArrival', 'loadingComplete', 'deliveryArrival', 'deliveryComplete'];
+            const currentIndex = sequence.indexOf(timeType);
+            
+            if (currentIndex < sequence.length - 1) {
+                const nextBtn = document.getElementById(sequence[currentIndex + 1] + 'Btn');
+                if (nextBtn) nextBtn.disabled = false;
+            }
+            
+            if (timeType === 'deliveryComplete') {
+                document.getElementById('toSignaturesBtn').disabled = false;
+            }
+            
+            showNotification(`${timeType.replace(/([A-Z])/g, ' $1').toLowerCase()} time recorded!`);
+        }
+
+        function openSignaturePad(type) {
+            const signature = prompt(`Please sign for ${type} (enter your name):`);
+            if (signature) {
+                document.getElementById(type + 'SignatureData').value = signature;
+                event.target.innerHTML = `<span>✅ Signed by: ${signature}</span>`;
+                event.target.style.background = '#e8f5e8';
+                event.target.style.color = '#27ae60';
+                showNotification(`${type} signature captured!`);
+            }
+        }
+
+        function exportLoadSheet() {
+            showNotification('Load sheet exported successfully!');
+        }
+
+        function addDriver(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const driver = Object.fromEntries(formData.entries());
+            
+            if (!driver.firstName || !driver.lastName || !driver.phone || !driver.licenseNumber) {
+                showNotification('Please fill in all required fields', 'error');
+                return;
+            }
+
+            const licenseExpiry = new Date(driver.licenseExpiry);
+            const insuranceExpiry = new Date(driver.insuranceExpiry);
+            const today = new Date();
+            const thirtyDays = new Date();
+            thirtyDays.setDate(today.getDate() + 30);
+
+            if (licenseExpiry <= thirtyDays) {
+                showNotification(`Warning: License expires on ${driver.licenseExpiry}`, 'warning');
+            }
+            if (insuranceExpiry <= thirtyDays) {
+                showNotification(`Warning: Insurance expires on ${driver.insuranceExpiry}`, 'warning');
+            }
+
+            const savedDriver = FleetDB.addDriver(driver);
+            showNotification(`Driver ${driver.firstName} ${driver.lastName} added successfully!`);
+            closeModal('addDriverModal');
+            event.target.reset();
+            document.getElementById('driverDocumentsPreview').innerHTML = '';
+            loadDrivers();
+        }
+
+        function addVehicle(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const vehicle = Object.fromEntries(formData.entries());
+            
+            if (!vehicle.vehicleType || !vehicle.unitNumber || !vehicle.make) {
+                showNotification('Please fill in all required fields', 'error');
+                return;
+            }
+
+            const savedVehicle = FleetDB.addVehicle(vehicle);
+            showNotification(`Vehicle ${vehicle.unitNumber} added successfully!`);
+            closeModal('addVehicleModal');
+            event.target.reset();
+            document.getElementById('vehicleDocumentsPreview').innerHTML = '';
+            loadVehicles();
+        }
+
+        function addCustomer(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const customer = Object.fromEntries(formData.entries());
+            
+            if (!customer.companyName || !customer.contactPerson || !customer.phone || !customer.email) {
+                showNotification('Please fill in all required fields', 'error');
+                return;
+            }
+
+            const savedCustomer = FleetDB.addCustomer(customer);
+            showNotification(`Customer ${customer.companyName} added successfully!`);
+            closeModal('addCustomerModal');
+            event.target.reset();
+            loadCustomers();
+        }
+
+        function createLoad(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const load = Object.fromEntries(formData.entries());
+            
+            if (!load.customerId || !load.materialType || !load.pickupLocation || !load.deliveryLocation) {
+                showNotification('Please fill in all required fields', 'error');
+                return;
+            }
+
+            const savedLoad = FleetDB.addLoad(load);
+            showNotification(`Load ${savedLoad.trackingNumber} created successfully!`);
+            closeModal('createLoadModal');
+            event.target.reset();
+            document.getElementById('routeCalculation').style.display = 'none';
+            loadLoads();
+        }
+
+        function createLoadSheet(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const loadSheet = Object.fromEntries(formData.entries());
+            
+            loadSheet.times = FleetDB.currentLoadSheet.times;
+            
+            const savedLoadSheet = FleetDB.addLoadSheet(loadSheet);
+            showNotification(`Load Sheet ${savedLoadSheet.sheetNumber} created successfully!`);
+            closeModal('createLoadSheetModal');
+            event.target.reset();
+            document.getElementById('loadSheetPhotosPreview').innerHTML = '';
+            loadLoadSheets();
+        }
+
+        function loadCustomersForLoadForm() {
+            const customerSelect = document.getElementById('loadCustomerSelect');
+            customerSelect.innerHTML = '<option value="">Select Customer</option>';
+            FleetDB.data.customers.forEach(customer => {
+                customerSelect.innerHTML += `<option value="${customer.id}">${customer.companyName}</option>`;
+            });
+        }
+
+        function updateDashboard() {
+            document.getElementById('totalDrivers').textContent = FleetDB.data.drivers.length;
+            document.getElementById('totalVehicles').textContent = FleetDB.data.vehicles.length;
+            document.getElementById('totalCustomers').textContent = FleetDB.data.customers.length;
+            document.getElementById('totalLoads').textContent = FleetDB.data.loads.length;
+            
+            const activeDrivers = FleetDB.data.drivers.filter(d => d.status === 'active').length;
+            const availableVehicles = FleetDB.data.vehicles.filter(v => v.status === 'available').length;
+            const newCustomers = FleetDB.data.customers.filter(c => {
+                const monthAgo = new Date();
+                monthAgo.setMonth(monthAgo.getMonth() - 1);
+                return new Date(c.createdAt) >= monthAgo;
+            }).length;
+            
+            document.getElementById('activeDrivers').textContent = `${activeDrivers} active today`;
+            document.getElementById('availableVehicles').textContent = `${availableVehicles} available`;
+            document.getElementById('newCustomers').textContent = `${newCustomers} new this month`;
+            
+            const totalRevenue = FleetDB.data.loads.reduce((sum, load) => {
+                return sum + (parseFloat(load.rate) * parseFloat(load.quantity) || 0);
+            }, 0);
+            document.getElementById('revenueToday').textContent = `$${totalRevenue.toFixed(2)} revenue`;
+            
+            updateSystemAlerts();
+        }
+
+        function updateSystemAlerts() {
+            const expiring = FleetDB.getExpiringDocuments();
+            const alertsContainer = document.getElementById('systemAlerts');
+            
+            if (expiring.length === 0) {
+                alertsContainer.innerHTML = '<div class="empty-state"><div class="empty-state-icon">✅</div><p>All documents current</p></div>';
+                return;
+            }
+
+            alertsContainer.innerHTML = expiring.map(item => `
+                <div style="padding: 15px; margin-bottom: 10px; border-left: 4px solid ${item.critical ? '#e74c3c' : '#f39c12'}; background: ${item.critical ? '#fee' : '#fff3cd'}; border-radius: 0 8px 8px 0;">
+                    <div style="font-weight: 600; color: ${item.critical ? '#e74c3c' : '#f39c12'}; margin-bottom: 5px;">
+                        ${item.critical ? '🚨' : '⚠️'} ${item.type} ${item.critical ? 'EXPIRED' : 'Expiring Soon'}
+                    </div>
+                    <div style="font-size: 14px; color: #2c3e50;">
+                        ${item.name}
+                    </div>
+                    <div style="font-size: 12px; color: #6c757d; margin-top: 5px;">
+                        Expires: ${new Date(item.expiry).toLocaleDateString()}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function loadDrivers() {
+            const driversGrid = document.getElementById('driversGrid');
+            const noDrivers = document.getElementById('noDrivers');
+            
+            if (FleetDB.data.drivers.length === 0) {
+                driversGrid.style.display = 'none';
+                noDrivers.style.display = 'block';
+                return;
+            }
+            
+            driversGrid.style.display = 'grid';
+            noDrivers.style.display = 'none';
+            
+            driversGrid.innerHTML = FleetDB.data.drivers.map(driver => {
+                const licenseExpiring = new Date(driver.licenseExpiry) <= new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+                const insuranceExpiring = new Date(driver.insuranceExpiry) <= new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+                
+                return `
+                    <div class="card">
+                    <div class="card-header">
+                            <div class="card-title">
+                                <div class="card-icon" style="background: #27ae60;">👨‍✈️</div>
+                                ${driver.firstName} ${driver.lastName}
+                            </div>
+                            <div class="status-badge status-${driver.status}">
+                                ${driver.status.toUpperCase()}
+                            </div>
+                        </div>
+                        <div class="card-details">
+                            <div class="detail-row">
+                                <span class="detail-label">Phone:</span>
+                                <span class="detail-value">${driver.phone}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">License:</span>
+                                <span class="detail-value">${driver.licenseNumber}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">License Expiry:</span>
+                                <span class="detail-value" style="color: ${licenseExpiring ? '#e74c3c' : '#2c3e50'}">
+                                    ${new Date(driver.licenseExpiry).toLocaleDateString()}
+                                    ${licenseExpiring ? '⚠️' : ''}
+                                </span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Insurance Expiry:</span>
+                                <span class="detail-value" style="color: ${insuranceExpiring ? '#e74c3c' : '#2c3e50'}">
+                                    ${new Date(driver.insuranceExpiry).toLocaleDateString()}
+                                    ${insuranceExpiring ? '⚠️' : ''}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="card-actions">
+                            <button class="btn-secondary" onclick="showNotification('Driver details - Feature coming soon!')">View Details</button>
+                            <button class="btn-action" onclick="showNotification('Driver edit - Feature coming soon!')">Edit</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function loadVehicles() {
+            const vehiclesGrid = document.getElementById('vehiclesGrid');
+            const noVehicles = document.getElementById('noVehicles');
+            
+            if (FleetDB.data.vehicles.length === 0) {
+                vehiclesGrid.style.display = 'none';
+                noVehicles.style.display = 'block';
+                return;
+            }
+            
+            vehiclesGrid.style.display = 'grid';
+            noVehicles.style.display = 'none';
+            
+            vehiclesGrid.innerHTML = FleetDB.data.vehicles.map(vehicle => {
+                const registrationExpiring = vehicle.registrationExpiry && new Date(vehicle.registrationExpiry) <= new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+                
+                return `
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <div class="card-icon" style="background: #667eea;">🚛</div>
+                                ${vehicle.unitNumber}
+                            </div>
+                            <div class="status-badge status-${vehicle.status}">
+                                ${vehicle.status.toUpperCase()}
+                            </div>
+                        </div>
+                        <div class="card-details">
+                            <div class="detail-row">
+                                <span class="detail-label">Make/Model:</span>
+                                <span class="detail-value">${vehicle.make} ${vehicle.model || ''}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Year:</span>
+                                <span class="detail-value">${vehicle.year || 'N/A'}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Capacity:</span>
+                                <span class="detail-value">${vehicle.capacity ? vehicle.capacity + ' tons' : 'N/A'}</span>
+                            </div>
+                        </div>
+                        <div class="card-actions">
+                            <button class="btn-secondary" onclick="showNotification('Vehicle details - Feature coming soon!')">View Details</button>
+                            <button class="btn-action" onclick="showNotification('Vehicle edit - Feature coming soon!')">Edit</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function loadCustomers() {
+            const customersGrid = document.getElementById('customersGrid');
+            const noCustomers = document.getElementById('noCustomers');
+            
+            if (FleetDB.data.customers.length === 0) {
+                customersGrid.style.display = 'none';
+                noCustomers.style.display = 'block';
+                return;
+            }
+            
+            customersGrid.style.display = 'grid';
+            noCustomers.style.display = 'none';
+            
+            customersGrid.innerHTML = FleetDB.data.customers.map(customer => {
+                const customerLoads = FleetDB.data.loads.filter(l => l.customerId === customer.id);
+                const totalRevenue = customerLoads.reduce((sum, load) => {
+                    return sum + (parseFloat(load.rate) * parseFloat(load.quantity) || 0);
+                }, 0);
+                
+                return `
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <div class="card-icon" style="background: #f39c12;">🏢</div>
+                                ${customer.companyName}
+                            </div>
+                            <div class="status-badge status-active">ACTIVE</div>
+                        </div>
+                        <div class="card-details">
+                            <div class="detail-row">
+                                <span class="detail-label">Contact:</span>
+                                <span class="detail-value">${customer.contactPerson}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Phone:</span>
+                                <span class="detail-value">${customer.phone}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Total Loads:</span>
+                                <span class="detail-value">${customerLoads.length}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Revenue:</span>
+                                <span class="detail-value">$${totalRevenue.toFixed(2)}</span>
+                            </div>
+                        </div>
+                        <div class="card-actions">
+                            <button class="btn-secondary" onclick="showNotification('Customer details - Feature coming soon!')">View Details</button>
+                            <button class="btn-action" onclick="showNotification('Customer edit - Feature coming soon!')">Edit</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function loadLoads() {
+            const loadsGrid = document.getElementById('loadsGrid');
+            const noLoads = document.getElementById('noLoads');
+            
+            if (FleetDB.data.loads.length === 0) {
+                loadsGrid.style.display = 'none';
+                noLoads.style.display = 'block';
+                return;
+            }
+            
+            loadsGrid.style.display = 'grid';
+            noLoads.style.display = 'none';
+            
+            loadsGrid.innerHTML = FleetDB.data.loads.map(load => {
+                const customer = FleetDB.data.customers.find(c => c.id === load.customerId);
+                const totalValue = (parseFloat(load.rate) * parseFloat(load.quantity)) || 0;
+                
+                return `
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <div class="card-icon" style="background: #e74c3c;">📦</div>
+                                ${load.trackingNumber}
+                            </div>
+                            <div class="status-badge status-${load.status}">
+                                ${load.status.toUpperCase()}
+                            </div>
+                        </div>
+                        <div class="card-details">
+                            <div class="detail-row">
+                                <span class="detail-label">Customer:</span>
+                                <span class="detail-value">${customer ? customer.companyName : 'Unknown'}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Material:</span>
+                                <span class="detail-value">${load.materialType}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Quantity:</span>
+                                <span class="detail-value">${load.quantity ? load.quantity + ' ' + load.unit : 'N/A'}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Value:</span>
+                                <span class="detail-value">$${totalValue.toFixed(2)}</span>
+                            </div>
+                        </div>
+                        <div class="card-actions">
+                            <button class="btn-secondary" onclick="showNotification('Load details - Feature coming soon!')">View Details</button>
+                            <button class="btn-action" onclick="showNotification('Driver assignment - Feature coming soon!')">Assign Driver</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function loadLoadSheets() {
+            const loadSheetsGrid = document.getElementById('loadSheetsGrid');
+            const noLoadSheets = document.getElementById('noLoadSheets');
+            
+            if (FleetDB.data.loadSheets.length === 0) {
+                loadSheetsGrid.style.display = 'none';
+                noLoadSheets.style.display = 'block';
+                return;
+            }
+            
+            loadSheetsGrid.style.display = 'grid';
+            noLoadSheets.style.display = 'none';
+            
+            loadSheetsGrid.innerHTML = FleetDB.data.loadSheets.map(sheet => {
+                const load = FleetDB.data.loads.find(l => l.id === sheet.loadId);
+                const driver = FleetDB.data.drivers.find(d => d.id === sheet.driverId);
+                const vehicle = FleetDB.data.vehicles.find(v => v.id === sheet.vehicleId);
+                
+                let totalTime = 'N/A';
+                if (sheet.times && sheet.times.departure && sheet.times.deliveryComplete) {
+                    const start = new Date(sheet.times.departure);
+                    const end = new Date(sheet.times.deliveryComplete);
+                    const diffHours = Math.round((end - start) / (1000 * 60 * 60) * 10) / 10;
+                    totalTime = diffHours + ' hours';
+                }
+                
+                return `
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <div class="card-icon" style="background: #9b59b6;">📋</div>
+                                ${sheet.sheetNumber}
+                            </div>
+                            <div class="status-badge status-completed">COMPLETED</div>
+                        </div>
+                        <div class="card-details">
+                            <div class="detail-row">
+                                <span class="detail-label">Load:</span>
+                                <span class="detail-value">${load ? load.trackingNumber : 'Unknown'}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Driver:</span>
+                                <span class="detail-value">${driver ? driver.firstName + ' ' + driver.lastName : 'Unknown'}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Vehicle:</span>
+                                <span class="detail-value">${vehicle ? vehicle.unitNumber : 'Unknown'}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Total Time:</span>
+                                <span class="detail-value">${totalTime}</span>
+                            </div>
+                        </div>
+                        <div class="card-actions">
+                            <button class="btn-secondary" onclick="showNotification('Load sheet view - Feature coming soon!')">View Sheet</button>
+                            <button class="btn-action" onclick="showNotification('Load sheet PDF exported!')">Export PDF</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function loadReports() {
+            const totalRevenue = FleetDB.data.loads.reduce((sum, load) => {
+                return sum + (parseFloat(load.rate) * parseFloat(load.quantity) || 0);
+            }, 0);
+
+            const driverPerformance = document.getElementById('driverPerformance');
+            const revenueAnalysis = document.getElementById('revenueAnalysis');
+
+            if (FleetDB.data.drivers.length === 0) {
+                driverPerformance.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📊</div><p>No driver data available</p></div>';
+            } else {
+                driverPerformance.innerHTML = `
+                    <div style="padding: 20px;">
+                        <h4 style="margin-bottom: 15px; color: #667eea;">Driver Performance Summary</h4>
+                        ${FleetDB.data.drivers.map(driver => {
+                            const driverLoads = FleetDB.data.loadSheets.filter(ls => ls.driverId === driver.id);
+                            return `
+                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f1f3f4;">
+                                    <span style="font-weight: 500;">${driver.firstName} ${driver.lastName}</span>
+                                    <span style="color: #667eea; font-weight: 600;">${driverLoads.length} loads</span>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                `;
+            }
+
+            revenueAnalysis.innerHTML = `
+                <div style="padding: 20px;">
+                    <h4 style="margin-bottom: 15px; color: #667eea;">Revenue Analysis</h4>
+                    <div style="text-align: center; padding: 20px 0;">
+                        <div style="font-size: 32px; font-weight: bold; color: #27ae60; margin-bottom: 10px;">
+                            $${totalRevenue.toFixed(2)}
+                        </div>
+                        <div style="color: #6c757d;">Total Revenue</div>
+                    </div>
+                    <div style="margin-top: 20px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                            <span>Average per Load:</span>
+                            <span style="font-weight: 600;">$${FleetDB.data.loads.length > 0 ? (totalRevenue / FleetDB.data.loads.length).toFixed(2) : '0.00'}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                            <span>Total Loads:</span>
+                            <span style="font-weight: 600;">${FleetDB.data.loads.length}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span>Completed Sheets:</span>
+                            <span style="font-weight: 600;">${FleetDB.data.loadSheets.length}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function exportData() {
+            const dataStr = JSON.stringify(FleetDB.data, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'lmk-fleet-data-' + new Date().toISOString().split('T')[0] + '.json';
+            link.click();
+            showNotification('Data exported successfully!');
+        }
+
+        function importData() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = function(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        try {
+                            const importedData = JSON.parse(e.target.result);
+                            FleetDB.data = importedData;
+                            showNotification('Data imported successfully!');
+                            updateDashboard();
+                            const activeNav = document.querySelector('.nav-item.active');
+                            if (activeNav) {
+                                activeNav.click();
+                            }
+                        } catch (error) {
+                            showNotification('Error importing data: Invalid JSON file', 'error');
+                        }
+                    };
+                    reader.readAsText(file);
+                }
+            };
+            input.click();
+        }
+
+        function clearAllData() {
+            if (confirm('Are you sure you want to reset all data? This cannot be undone.')) {
+                FleetDB.data = {
+                    drivers: [],
+                    vehicles: [],
+                    customers: [],
+                    loads: [],
+                    loadSheets: [],
+                    documents: [],
+                    settings: FleetDB.data.settings
+                };
+                showNotification('All data has been reset!');
+                updateDashboard();
+                const activeNav = document.querySelector('.nav-item.active');
+                if (activeNav) {
+                    activeNav.click();
+                }
+            }
+        }
+
+        function generateDailyReport() {
+            showNotification('Daily report generated successfully!');
+        }
+
+        function exportAllReports() {
+            showNotification('All reports exported successfully!');
+        }
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            updateDashboard();
+            showNotification('LMK Fleet Management Testing Environment Ready!', 'info');
+        });
+
+        // Close modals when clicking outside
+        document.addEventListener('click', function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.classList.remove('active');
+            }
+        });
+
+        // Handle escape key to close modals
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                const activeModal = document.querySelector('.modal.active');
+                if (activeModal) {
+                    activeModal.classList.remove('active');
+                }
+            }
+        });
+    </script>
+</body>
+</html>
