@@ -1,41 +1,3 @@
-Perfect! Here's the complete, ready-to-paste code for your GitHub Pages deployment. This is the full HTML file with all functionality included:
-
-## 🚀 **Ready to Deploy**
-
-1. **Copy the entire code** from the artifact above
-2. **Go to your GitHub repo** and edit `index.html`
-3. **Delete everything** in the file
-4. **Paste this complete code**
-5. **Commit changes**
-6. **Wait 2-3 minutes** for GitHub Pages to rebuild
-
-## ✅ **This Complete Version Includes:**
-
-- **All tab functionality** with proper JavaScript
-- **Real address validation** and route calculation
-- **Your material types** (Reject Sand, Drain Rock, etc.)
-- **Time tracking workflow** with sequential buttons
-- **Document upload** with expiry notifications
-- **Complete load sheet system** with 4-step workflow
-- **Export/import** functionality
-- **Mobile responsive** design
-- **All accessibility labels** fixed
-
-## 🎯 **Your Client Can Now Test:**
-
-1. **Add drivers** with license/insurance tracking
-2. **Add vehicles** with registration dates
-3. **Add customers** with real addresses
-4. **Create loads** with route calculations
-5. **Complete load sheets** with time tracking
-6. **Upload documents** and see expiry alerts
-7. **Export all data** for backup
-
-The tabs will work perfectly now! The error you were seeing should be completely resolved.
-
-**Live URL Format:** `https://aseanchronous.github.io/lmk-fleet-testing`
-
-Ready to paste and deploy! 🚀
 const load = FleetDB.data.loads.find(l => l.id === loadId);
             const customer = FleetDB.data.customers.find(c => c.id === load.customerId);
 
@@ -978,9 +940,17 @@ const load = FleetDB.data.loads.find(l => l.id === loadId);
 
         // Event Listeners
         document.addEventListener('DOMContentLoaded', function() {
+            // Set up all event listeners
+            setupEventListeners();
+            
+            // Initialize dashboard
             updateDashboard();
             updateTestingEnvironment();
             showNotification('LMK Fleet Management - Complete Testing Environment Ready! 🚀');
+            
+            console.log('Application initialized successfully');
+            console.log('Navigation items found:', document.querySelectorAll('.nav-item').length);
+            console.log('Content sections found:', document.querySelectorAll('.content').length);
         });
 
         // Close modals when clicking outside
@@ -1965,28 +1935,28 @@ const load = FleetDB.data.loads.find(l => l.id === loadId);
         </header>
 
         <nav class="main-nav">
-            <div class="nav-item active" onclick="showSection('dashboard')">
+            <div class="nav-item active" data-section="dashboard">
                 <span>📊</span> Dashboard
             </div>
-            <div class="nav-item" onclick="showSection('drivers')">
+            <div class="nav-item" data-section="drivers">
                 <span>👨‍✈️</span> Drivers
             </div>
-            <div class="nav-item" onclick="showSection('vehicles')">
+            <div class="nav-item" data-section="vehicles">
                 <span>🚛</span> Vehicles
             </div>
-            <div class="nav-item" onclick="showSection('customers')">
+            <div class="nav-item" data-section="customers">
                 <span>👥</span> Customers
             </div>
-            <div class="nav-item" onclick="showSection('loads')">
+            <div class="nav-item" data-section="loads">
                 <span>📦</span> Loads
             </div>
-            <div class="nav-item" onclick="showSection('loadsheets')">
+            <div class="nav-item" data-section="loadsheets">
                 <span>📋</span> Load Sheets
             </div>
-            <div class="nav-item" onclick="showSection('reports')">
+            <div class="nav-item" data-section="reports">
                 <span>📈</span> Reports
             </div>
-            <div class="nav-item" onclick="showSection('testing')">
+            <div class="nav-item" data-section="testing">
                 <span>🧪</span> Testing Tools
             </div>
         </nav>
@@ -2857,10 +2827,16 @@ const load = FleetDB.data.loads.find(l => l.id === loadId);
             navItems.forEach(item => item.classList.remove('active'));
             
             // Show selected section
-            document.getElementById(sectionId).classList.add('active');
+            const targetSection = document.getElementById(sectionId);
+            if (targetSection) {
+                targetSection.classList.add('active');
+            }
             
             // Highlight active nav
-            event.target.classList.add('active');
+            const activeNav = document.querySelector(`[data-section="${sectionId}"]`);
+            if (activeNav) {
+                activeNav.classList.add('active');
+            }
             
             // Load data for the section
             switch(sectionId) {
@@ -2889,6 +2865,74 @@ const load = FleetDB.data.loads.find(l => l.id === loadId);
                     updateTestingEnvironment();
                     break;
             }
+        }
+
+        // Set up navigation event listeners
+        function setupNavigation() {
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    const sectionId = this.getAttribute('data-section');
+                    if (sectionId) {
+                        showSection(sectionId);
+                    }
+                });
+            });
+        }
+
+        // Set up all button event listeners
+        function setupEventListeners() {
+            // Navigation
+            setupNavigation();
+            
+            // Header buttons - using event delegation since they're always present
+            document.addEventListener('click', function(e) {
+                // Check if clicked element has onclick attribute or is a button we care about
+                const target = e.target;
+                
+                // Handle onclick attributes manually
+                if (target.onclick) {
+                    return; // Let the onclick handler work
+                }
+                
+                // Handle buttons by their text content or classes
+                if (target.textContent.includes('Export Data')) {
+                    exportData();
+                }
+                else if (target.textContent.includes('Import Data')) {
+                    importData();
+                }
+                else if (target.textContent.includes('Generate Test Data')) {
+                    generateTestData();
+                }
+                else if (target.textContent.includes('Reset System')) {
+                    clearAllData();
+                }
+                else if (target.textContent.includes('Add Driver')) {
+                    openAddDriverModal();
+                }
+                else if (target.textContent.includes('Add Vehicle')) {
+                    openAddVehicleModal();
+                }
+                else if (target.textContent.includes('Add Customer')) {
+                    openAddCustomerModal();
+                }
+                else if (target.textContent.includes('Create Load')) {
+                    openCreateLoadModal();
+                }
+                else if (target.textContent.includes('Create Load Sheet')) {
+                    openCreateLoadSheetModal();
+                }
+                else if (target.textContent.includes('Generate Report')) {
+                    generateDailyReport();
+                }
+                else if (target.textContent.includes('Export All Reports')) {
+                    exportAllReports();
+                }
+                else if (target.textContent.includes('Run Full Test')) {
+                    runFullSystemTest();
+                }
+            });
         }
 
         // Modal Management
